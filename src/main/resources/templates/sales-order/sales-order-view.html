@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: commonHead('Sales Orders')}"></head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-4">
+    <h1>Sales Orders</h1>
+
+    <!-- Filter Form -->
+    <form th:action="@{/sales-order-view}" method="get" class="row g-3 mb-4">
+        <div class="col-auto">
+            <label for="from" class="form-label">From:</label>
+            <input type="date" id="from" name="from" th:value="${from}" class="form-control"/>
+        </div>
+        <div class="col-auto">
+            <label for="to" class="form-label">To:</label>
+            <input type="date" id="to" name="to" th:value="${to}" class="form-control"/>
+        </div>
+        <div class="col-auto align-self-end">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a th:href="@{/sales-order-view}" class="btn btn-secondary">Reset</a>
+        </div>
+    </form>
+
+    <!-- Sales Orders Table -->
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Order Number</th>
+            <th>Date</th>
+            <th>Partner</th>
+            <th>Status</th>
+            <th>Net Sum</th>
+            <th>VAT Sum</th>
+            <th>Gross Sum</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="order, iterStat : ${orders}">
+            <td th:text="${iterStat.count}"></td>
+            <td th:text="${order.salesOrderNumber}"></td>
+            <td th:text="${order.salesOrderDate}"></td>
+            <td th:text="${order.partner.partnerName}"></td>
+            <td th:text="${order.salesOrderStatus}"></td>
+            <td th:text="${order.salesOrderNetSum}"></td>
+            <td th:text="${order.salesOrderVatSum}"></td>
+            <td th:text="${order.salesOrderGrossSum}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

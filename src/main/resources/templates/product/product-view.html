@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: commonHead('Products')}"></head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-4">
+    <h1 class="mb-4">Products</h1>
+
+    <!-- Filter Form -->
+    <form th:action="@{/product-view}" method="get" class="row g-3 mb-4">
+        <div class="col-auto">
+            <label for="name" class="form-label">Product Name:</label>
+            <input type="text" id="name" name="name" th:value="${name}" class="form-control" placeholder="Search by name">
+        </div>
+        <div class="col-auto align-self-end">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a th:href="@{/product-view}" class="btn btn-secondary">Reset</a>
+        </div>
+    </form>
+
+    <!-- Products Table -->
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>SKU</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Purchase Price</th>
+            <th>Sales Price</th>
+            <th>VAT Key</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="product, iterStat : ${products}">
+            <td th:text="${iterStat.count}"></td>
+            <td th:text="${product.productSku}"></td>
+            <td th:text="${product.productName}"></td>
+            <td th:text="${product.productCategory}"></td>
+            <td th:text="${product.productPurchasePrice}"></td>
+            <td th:text="${product.productSalesPrice}"></td>
+            <td th:text="${product.productVatKey}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <a th:href="@{/product-create}" class="btn btn-success">Create New Product</a>
+</div>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

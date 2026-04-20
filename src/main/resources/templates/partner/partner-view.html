@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: commonHead('Partners')}"></head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-4">
+    <h1>Partners</h1>
+
+    <!-- Filter Form -->
+    <form th:action="@{/partner-view}" method="get" class="row g-3 mb-4">
+        <div class="col-auto">
+            <label for="name" class="form-label">Partner Name:</label>
+            <input type="text" id="name" name="name" th:value="${name}" class="form-control" placeholder="Search by name"/>
+        </div>
+        <div class="col-auto align-self-end">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a th:href="@{/partner-view}" class="btn btn-secondary">Reset</a>
+        </div>
+    </form>
+
+    <!-- Partners Table -->
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Partner Name</th>
+            <th>Email</th>
+            <th>Telephone</th>
+            <th>Address</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="partner, iterStat : ${partners}">
+            <td th:text="${iterStat.count}"></td>
+            <td th:text="${partner.partnerName}"></td>
+            <td th:text="${partner.partnerEmail}"></td>
+            <td th:text="${partner.partnerTelephone}"></td>
+            <td th:text="${partner.partnerAddress}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

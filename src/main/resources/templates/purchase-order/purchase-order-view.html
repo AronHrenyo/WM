@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: commonHead('Purchase Orders')}"></head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-4">
+    <h1>Purchase Orders</h1>
+
+    <!-- Filter Form -->
+    <form th:action="@{/purchase-order-view}" method="get" class="row g-3 mb-4">
+        <div class="col-auto">
+            <label for="from" class="form-label">From:</label>
+            <input type="date" id="from" name="from" th:value="${from}" class="form-control"/>
+        </div>
+        <div class="col-auto">
+            <label for="to" class="form-label">To:</label>
+            <input type="date" id="to" name="to" th:value="${to}" class="form-control"/>
+        </div>
+        <div class="col-auto align-self-end">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a th:href="@{/purchase-order-view}" class="btn btn-secondary">Reset</a>
+        </div>
+    </form>
+
+    <!-- Purchase Orders Table -->
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Order Number</th>
+            <th>Date</th>
+            <th>Partner</th>
+            <th>Status</th>
+            <th>Net Sum</th>
+            <th>VAT Sum</th>
+            <th>Gross Sum</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="order, iterStat : ${orders}">
+            <td th:text="${iterStat.count}"></td>
+            <td th:text="${order.purchaseOrderNumber}"></td>
+            <td th:text="${order.purchaseOrderDate}"></td>
+            <td th:text="${order.partner.partnerName}"></td>
+            <td th:text="${order.purchaseOrderStatus}"></td>
+            <td th:text="${order.purchaseOrderNetSum}"></td>
+            <td th:text="${order.purchaseOrderVatSum}"></td>
+            <td th:text="${order.purchaseOrderGrossSum}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Insert footer -->
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

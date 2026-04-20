@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>Invoice PDF</title>
+  <style type="text/css">
+    body { font-family: Arial, sans-serif; font-size: 12px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #333; padding: 5px; text-align: left; }
+    th { background-color: #f2f2f2; }
+  </style>
+</head>
+<body>
+<h2>Invoice: <span th:text="${invoice.invoiceNumber}"></span></h2>
+<p>Date: <span th:text="${invoice.invoiceDate}"></span></p>
+<p>Partner: <span th:text="${invoice.partner.partnerName}"></span></p>
+
+<table>
+  <thead>
+  <tr>
+    <th>#</th>
+    <th>Product</th>
+    <th>Qty</th>
+    <th>Price</th>
+    <th>Net</th>
+    <th>VAT</th>
+    <th>Gross</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="line, iterStat : ${invoice.invoiceLines}">
+    <td th:text="${iterStat.count}"></td>
+    <td th:text="${line.product.productName}"></td>
+    <td th:text="${line.invoiceLineQuantity}"></td>
+    <td th:text="${line.invoiceLinePrice}"></td>
+    <td th:text="${line.invoiceLineNetSum}"></td>
+    <td th:text="${line.invoiceLineVatSum}"></td>
+    <td th:text="${line.invoiceLineGrossSum}"></td>
+  </tr>
+  </tbody>
+</table>
+
+<p>Total Net: <span th:text="${invoice.invoiceNetSum}"></span></p>
+<p>Total VAT: <span th:text="${invoice.invoiceVatSum}"></span></p>
+<p>Total Gross: <span th:text="${invoice.invoiceGrossSum}"></span></p>
+</body>
+</html>

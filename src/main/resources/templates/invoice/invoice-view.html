@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: commonHead('Invoices')}"></head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-4">
+    <h1>Invoices</h1>
+
+    <!-- Filter Form -->
+    <form th:action="@{/invoice-view}" method="get" class="row g-3 mb-4">
+        <div class="col-auto">
+            <label for="from" class="form-label">From:</label>
+            <input type="date" id="from" name="from" th:value="${from}" class="form-control"/>
+        </div>
+        <div class="col-auto">
+            <label for="to" class="form-label">To:</label>
+            <input type="date" id="to" name="to" th:value="${to}" class="form-control"/>
+        </div>
+        <div class="col-auto align-self-end">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a th:href="@{/invoice-view}" class="btn btn-secondary">Reset</a>
+        </div>
+    </form>
+
+    <!-- Invoice Table -->
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Invoice Number</th>
+            <th>Date</th>
+            <th>Partner</th>
+            <th>Status</th>
+            <th>Net Sum</th>
+            <th>VAT Sum</th>
+            <th>Gross Sum</th>
+            <th>PDF</th>
+            <th>Edit</th> <!-- ÚJ -->
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="invoice, iterStat : ${orders}">
+            <td th:text="${iterStat.count}"></td>
+            <td th:text="${invoice.invoiceNumber}"></td>
+            <td th:text="${invoice.invoiceDate}"></td>
+
+            <td th:text="${invoice.partner != null ? invoice.partner.partnerName : 'N/A'}"></td>
+
+            <td th:text="${invoice.invoiceStatus}"></td>
+            <td th:text="${invoice.invoiceNetSum}"></td>
+            <td th:text="${invoice.invoiceVatSum}"></td>
+            <td th:text="${invoice.invoiceGrossSum}"></td>
+
+            <!-- PDF -->
+            <td>
+                <a th:href="@{'/invoice/' + ${invoice.invoiceId} + '/pdf'}"
+                   class="btn btn-sm btn-danger">
+                    PDF
+                </a>
+            </td>
+
+            <!-- EDIT -->
+            <td>
+                <a th:href="@{'/invoice/' + ${invoice.invoiceId} + '/edit'}"
+                   class="btn btn-sm btn-primary">
+                    Edit
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

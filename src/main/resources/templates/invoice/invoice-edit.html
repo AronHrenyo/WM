@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: commonHead('Edit Invoice')}"></head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-4">
+    <h1>Edit Invoice</h1>
+
+    <form th:action="@{/invoice/save}" th:object="${invoice}" method="post">
+        <input type="hidden" th:field="*{invoiceId}"/>
+
+        <!-- BASIC DATA -->
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label>Invoice Number</label>
+                <input type="text" th:field="*{invoiceNumber}" class="form-control"/>
+            </div>
+
+            <div class="col-md-3">
+                <label>Date</label>
+                <input type="date" th:field="*{invoiceDate}" class="form-control"/>
+            </div>
+
+            <div class="col-md-3">
+                <label>Status</label>
+                <input type="text" th:field="*{invoiceStatus}" class="form-control"/>
+            </div>
+
+            <div class="col-md-3">
+                <label>Partner</label>
+                <select th:field="*{partner.partnerId}" class="form-select">
+                    <option value="">-- Select --</option>
+                    <option th:each="p : ${partners}"
+                            th:value="${p.partnerId}"
+                            th:text="${p.partnerName}"
+                            th:selected="${invoice.partner != null} ? ${p.partnerId} == ${invoice.partner.partnerId} : false">
+                    </option>
+                </select>
+            </div>
+        </div>
+
+        <!-- INVOICE LINES -->
+        <h4>Invoice Lines</h4>
+        <table class="table table-bordered" id="linesTable">
+            <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Qty</th>
+                <th>VAT %</th>
+                <th>Net</th>
+                <th>VAT</th>
+                <th>Gross</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="line, stat : *{lines}">
+                <td>
+                    <select class="form-control product-select"
+                            th:field="*{lines[__${stat.index}__].product.productId}">
+                        <option value="">-- Select --</option>
+                        <option th:each="p : ${products}"
+                                th:value="${p.productId}"
+                                th:data-price="${p.productSalesPrice}"
+                                th:data-vat="${p.productVatKey}"
+                                th:text="${p.productName}">
+                        </option>
+                    </select>
+                </td>
+                <td>
+                    <input type="number" step="0.01" class="form-control price"
+                           th:field="*{lines[__${stat.index}__].invoiceLinePrice}"/>
+                </td>
+                <td>
+                    <input type="number" class="form-control qty"
+                           th:field="*{lines[__${stat.index}__].invoiceLineQuantity}"/>
+                </td>
+                <td>
+                    <input type="number" class="form-control vatKey"
+                           th:field="*{lines[__${stat.index}__].invoiceLineVatKey}"/>
+                </td>
+                <td>
+                    <input type="number" step="0.01" class="form-control net"
+                           th:field="*{lines[__${stat.index}__].invoiceLineNetSum}"/>
+                </td>
+                <td>
+                    <input type="number" step="0.01" class="form-control vat"
+                           th:field="*{lines[__${stat.index}__].invoiceLineVatSum}"/>
+                </td>
+                <td>
+                    <input type="number" step="0.01" class="form-control gross"
+                           th:field="*{lines[__${stat.index}__].invoiceLineGrossSum}"/>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger remove-row">X</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <button type="button" id="addRow" class="btn btn-success mb-3">+ Add Product</button>
+
+        <!-- TOTALS -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label>Net Total</label>
+                <input type="number" step="0.01" th:field="*{invoiceNetSum}" class="form-control"/>
+            </div>
+            <div class="col-md-4">
+                <label>VAT Total</label>
+                <input type="number" step="0.01" th:field="*{invoiceVatSum}" class="form-control"/>
+            </div>
+            <div class="col-md-4">
+                <label>Gross Total</label>
+                <input type="number" step="0.01" th:field="*{invoiceGrossSum}" class="form-control"/>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="/invoice-view" class="btn btn-secondary">Back</a>
+    </form>
+</div>
+
+<!-- ================= JS ================= -->
+<script th:inline="javascript">
+    let products = [[${products}]];
+
+    document.addEventListener("DOMContentLoaded", function () {
+        function recalcRow(row) {
+            let price = parseFloat(row.querySelector(".price")?.value) || 0;
+            let qty = parseFloat(row.querySelector(".qty")?.value) || 0;
+            let vatKey = parseFloat(row.querySelector(".vatKey")?.value) || 0;
+            let net = price * qty;
+            let vat = net * (vatKey / 100);
+            let gross = net + vat;
+            row.querySelector(".net").value = net.toFixed(2);
+            row.querySelector(".vat").value = vat.toFixed(2);
+            row.querySelector(".gross").value = gross.toFixed(2);
+        }
+
+        function recalcAll() {
+            let rows = document.querySelectorAll("#linesTable tbody tr");
+            let netTotal = 0, vatTotal = 0, grossTotal = 0;
+            rows.forEach(row => {
+                recalcRow(row);
+                netTotal += parseFloat(row.querySelector(".net").value) || 0;
+                vatTotal += parseFloat(row.querySelector(".vat").value) || 0;
+                grossTotal += parseFloat(row.querySelector(".gross").value) || 0;
+            });
+            document.querySelector("[name='invoiceNetSum']").value = netTotal.toFixed(2);
+            document.querySelector("[name='invoiceVatSum']").value = vatTotal.toFixed(2);
+            document.querySelector("[name='invoiceGrossSum']").value = grossTotal.toFixed(2);
+        }
+
+        function reindexRows() {
+            let rows = document.querySelectorAll("#linesTable tbody tr");
+            rows.forEach((row, index) => {
+                row.querySelectorAll("input, select").forEach(el => {
+                    if (el.name) {
+                        el.name = el.name.replace(/lines\[\d+]/, `lines[${index}]`);
+                    }
+                });
+            });
+        }
+
+        document.addEventListener("input", function (e) {
+            if (e.target.closest("tr")) recalcAll();
+        });
+
+        document.addEventListener("change", function (e) {
+            if (e.target.classList.contains("product-select")) {
+                let option = e.target.selectedOptions[0];
+                let row = e.target.closest("tr");
+                if (!option) return;
+                row.querySelector(".price").value = option.dataset.price || 0;
+                row.querySelector(".vatKey").value = option.dataset.vat || 0;
+                recalcAll();
+            }
+        });
+
+        document.getElementById("addRow").addEventListener("click", function () {
+            let tbody = document.querySelector("#linesTable tbody");
+            let index = tbody.rows.length;
+            let row = tbody.insertRow();
+            let options = '<option value="">-- Select --</option>';
+            products.forEach(p => {
+                options += `<option value="${p.productId}" data-price="${p.productSalesPrice}" data-vat="${p.productVatKey}">${p.productName}</option>`;
+            });
+            row.innerHTML = `
+            <td><select name="lines[${index}].product.productId" class="form-control product-select">${options}</select></td>
+            <td><input name="lines[${index}].invoiceLinePrice" class="form-control price"/></td>
+            <td><input name="lines[${index}].invoiceLineQuantity" class="form-control qty"/></td>
+            <td><input name="lines[${index}].invoiceLineVatKey" class="form-control vatKey"/></td>
+            <td><input name="lines[${index}].invoiceLineNetSum" class="form-control net"/></td>
+            <td><input name="lines[${index}].invoiceLineVatSum" class="form-control vat"/></td>
+            <td><input name="lines[${index}].invoiceLineGrossSum" class="form-control gross"/></td>
+            <td><button type="button" class="btn btn-danger remove-row">X</button></td>`;
+        });
+
+        document.addEventListener("click", function (e) {
+            if (e.target.classList.contains("remove-row")) {
+                e.target.closest("tr").remove();
+                reindexRows();
+                recalcAll();
+            }
+        });
+
+        recalcAll();
+    });
+</script>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+/* warehouse-map.html */
+    #map {
+        height: 500px;
+    }
+
+    .leaflet-container img {
+        max-width: none !important;
+    }
+
+
+/*
+body {
+    background-color: #040e01;
+    color: white;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #95c78e;
+    color: white;
+}
+
+th {
+    padding: 12px;
+    background-color: #3a3a3a;
+    text-align: left;
+}
+
+td {
+    padding: 10px;
+    border-top: 1px solid #555;
+}
+
+
+.card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: white;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    margin-bottom: 15px;
+    outline: none;
+}
+
+
+button {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    background-color: #4a4a4a;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+
+button:hover {
+    background-color: green;
+}
+*/

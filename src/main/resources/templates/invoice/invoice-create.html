@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: commonHead('Create Invoice')}"></head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-5">
+    <h1 class="mb-4">Create New Invoice</h1>
+
+    <form th:action="@{/invoice-create}" th:object="${invoice}" method="post">
+        <div class="mb-3">
+            <label for="invoiceNumber" class="form-label">Invoice Number</label>
+            <input type="text" th:field="*{invoiceNumber}" class="form-control" id="invoiceNumber" placeholder="Enter invoice number" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="invoiceDate" class="form-label">Invoice Date</label>
+            <input type="date" th:field="*{invoiceDate}" class="form-control" id="invoiceDate" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="partner" class="form-label">Partner</label>
+            <select th:field="*{partner}" class="form-select" id="partner" required>
+                <option th:each="p : ${partners}"
+                        th:value="${p.partnerId}"
+                        th:text="${p.partnerName}">
+                </option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="status" class="form-label">Status</label>
+            <input type="text" th:field="*{invoiceStatus}" class="form-control" id="status" placeholder="Enter status" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="vatSum" class="form-label">VAT</label>
+            <input type="number" step="0.01" th:field="*{invoiceVatSum}" class="form-control" id="vatSum" placeholder="Enter VAT">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Invoice</button>
+        <a th:href="@{/invoice-view}" class="btn btn-secondary ms-2">Back to List</a>
+    </form>
+</div>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: commonHead('Warehouses')}"></head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<h2>Warehouses: </h2>
+
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    // Load map (Budapest centered)
+    const map = L.map('map').setView([47.4979, 19.0402], 7);
+
+    // OpenStreetMap layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Warehouses from backend
+    fetch('/api/warehouses')
+        .then(response => response.json())
+        .then(data => {
+
+            data.forEach(w => {
+                if (w.lat && w.lon) {
+                    const marker = L.marker([w.lat, w.lon]).addTo(map);
+                    marker.bindPopup(`
+                        <b>${w.warehouseName}</b><br/>
+                        Kapacitás: ${w.warehouseCapacity}
+                    `);
+                }
+            });
+
+        })
+        .catch(err => console.error("Error:", err));
+</script>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    background: black;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    color: white;
+    height: 100%;
+    background-image: url(../images/warehouse.jpeg);
+    flex-direction: column;
+}
+
+.container {
+    background: #047857;
+    padding: 40px;
+    border-radius: 20px;
+    width: 800px;
+    height: fit-content;
+    display: flex;
+    align-self: center;
+    gap: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.right-column, .left-column {
+    flex: 1;
+}
+
+h2 {
+    color: white;
+    margin-bottom: 15px;
+    text-align: center;
+
+}
+
+label {
+    color: white;
+    font-size: 14px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    outline: none;
+    background: white;
+}
+
+.line {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: #10b981;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #059669;
+    transform: translateY(-2px);
+}

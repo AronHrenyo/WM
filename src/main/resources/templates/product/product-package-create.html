@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: commonHead('Create Product & Package')}"></head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-5">
+    <div id="reader"></div>
+    <h2><i class="bi bi-upc-scan"></i> Scan Barcode & Create Product</h2>
+    <div class="form-container">
+        <form id="productPackageForm">
+            <div class="mb-3">
+                <label class="form-label">Barcode</label>
+                <input type="text" class="form-control" id="barcodeInput" readonly required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Product SKU</label>
+                <input type="text" class="form-control" id="skuInput" placeholder="Enter product SKU" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Product Name</label>
+                <input type="text" class="form-control" id="nameInput" placeholder="Enter product name" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Category</label>
+                <input type="text" class="form-control" id="categoryInput" placeholder="Enter category">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">VAT Key</label>
+                <input type="number" class="form-control" id="vatInput" placeholder="Enter VAT key">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Quantity (products in the package)</label>
+                <input type="number" class="form-control" id="quantityInput" value="1" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Purchase Price</label>
+                <input type="number" step="0.01" class="form-control" id="purchasePriceInput"
+                       placeholder="Enter purchase price">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Sales Price</label>
+                <input type="number" step="0.01" class="form-control" id="salesPriceInput" placeholder="Enter sales price">
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Save Product & Package</button>
+
+            <div id="statusMessage" class="mt-3 text-center"></div>
+        </form>
+    </div>
+</div>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+
+<!-- JS -->
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script>
+    const scanner = new Html5Qrcode("reader");
+    let lastScanned = "";
+    let lastScanTime = 0;
+    const SCAN_DELAY = 1000;
+
+    // EAN-13 checksum calculation
+    function calculateEAN13CheckDigit(code12) {
+        let sum = 0;
+        for (let i = 0; i < 12; i++) {
+            const num = parseInt(code12.charAt(i));
+            sum += (i % 2 === 0) ? num : num * 3;
+        }
+        return (10 - (sum % 10)) % 10;
+    }
+
+    // EAN-13
+    function normalizeEAN13(raw) {
+        const digits = raw.replace(/\D/g, '');
+        if (digits.length < 12) return digits;
+        const first12 = digits.substring(0, 12);
+        const checkDigit = calculateEAN13CheckDigit(first12);
+        return first12 + checkDigit;
+    }
+
+    // Message under the form
+    function showMessage(text, type = 'success') {
+        const msg = document.getElementById("statusMessage");
+        msg.textContent = text;
+        msg.className = `mt-3 text-center text-${type}`;
+    }
+
+    // Barcode scan success
+    function onScanSuccess(decodedText) {
+        const now = Date.now();
+        const code = normalizeEAN13(decodedText);
+
+        // Debounce
+        if (now - lastScanTime < SCAN_DELAY) return;
+        if (code === lastScanned) return;
+
+        lastScanTime = now;
+        lastScanned = code;
+
+        const barcodeInput = document.getElementById("barcodeInput");
+        const saveButton = document.querySelector("#productPackageForm button[type='submit']");
+
+        barcodeInput.value = code;
+        saveButton.disabled = false;
+
+        // Focus delay
+        setTimeout(() => document.getElementById("skuInput").focus(), 50);
+
+        // Check if barcode exists
+        fetch(`/api/product-packages/by-barcode/${code}`)
+            .then(resp => resp.json())
+            .then(data => {
+                if (data && data.sku) {
+                    document.getElementById("skuInput").value = data.sku;
+                    document.getElementById("nameInput").value = data.productName;
+                    document.getElementById("categoryInput").value = data.category || '';
+                    document.getElementById("vatInput").value = data.vatKey || '';
+                    document.getElementById("quantityInput").value = data.quantity || 1;
+                    document.getElementById("purchasePriceInput").value = data.purchasePrice || '';
+                    document.getElementById("salesPriceInput").value = data.salesPrice || '';
+
+                    saveButton.disabled = true;
+                    showMessage("This product already exists!", "warning");
+                } else {
+                    document.getElementById("skuInput").value = '';
+                    document.getElementById("nameInput").value = '';
+                    document.getElementById("categoryInput").value = '';
+                    document.getElementById("vatInput").value = '';
+                    document.getElementById("quantityInput").value = 1;
+
+                    saveButton.disabled = false;
+                    showMessage("", "success");
+                }
+            })
+            .catch(err => {
+                console.error("Barcode fetch error:", err);
+                saveButton.disabled = false;
+                showMessage("", "success");
+            });
+    }
+
+    // Start HTML5 QR/Barcode scanner
+    scanner.start(
+        {facingMode: "environment"},
+        {fps: 15, qrbox: {width: 250, height: 120}, formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13]},
+        onScanSuccess
+    );
+
+    // Form submit
+    document.getElementById("productPackageForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const saveButton = document.querySelector("#productPackageForm button[type='submit']");
+        if (saveButton.disabled) return; // if already exists, do not send again
+
+        const payload = {
+            sku: document.getElementById("skuInput").value,
+            productName: document.getElementById("nameInput").value,
+            category: document.getElementById("categoryInput").value,
+            vatKey: parseInt(document.getElementById("vatInput").value) || null,
+            quantity: parseInt(document.getElementById("quantityInput").value),
+            purchasePrice: parseFloat(document.getElementById("purchasePriceInput").value) || 0,
+            salesPrice: parseFloat(document.getElementById("salesPriceInput").value) || 0,
+            barcode: document.getElementById("barcodeInput").value
+        };
+
+        fetch('/api/product-packages', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        })
+            .then(resp => {
+                if (resp.ok) {
+                    showMessage("Product & Package saved: " + payload.barcode, "success");
+                    document.getElementById("productPackageForm").reset();
+                    document.getElementById("barcodeInput").value = '';
+                    lastScanned = ""; // for scanning new barcode
+                } else {
+                    showMessage("Error saving: " + resp.status, "danger");
+                }
+            })
+            .catch(err => showMessage("Fetch error: " + err, "danger"));
+    });
+</script>
+
+</body>
+</html>
